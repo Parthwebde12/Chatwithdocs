@@ -7,9 +7,8 @@ export async function parseFile(
   const ext = filename.split(".").pop()?.toLowerCase();
 
   if (ext === "pdf") {
-    // Imported dynamically because pdf-parse reads a test file on module load
-    // in some environments — safer to load it lazily inside the function.
-    const pdfParse = (await import("pdf-parse")).default;
+   
+    const pdfParse = (await import("pdf-parse/lib/pdf-parse.js")).default;
     const result = await pdfParse(buffer);
     return result.text;
   }

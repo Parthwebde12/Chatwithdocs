@@ -3,14 +3,34 @@ import { getSupabaseServerClient } from "@/lib/supabase";
 import { parseFile } from "@/lib/parseFile";
 import { chunkText } from "@/lib/chunkText";
 import { embedBatch } from "@/lib/embeddings";
+import { assertEnv } from "@/lib/checkEnv";
 
 export async function POST(req: NextRequest) {
   try {
+    assertEnv();
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    const MAX_SIZE_MB = 10;
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      return NextResponse.json(
+        { error: `File too large. Max size is ${MAX_SIZE_MB}MB.` },
+        { status: 400 }
+      );
+    }
+
+    const allowedExtensions = ["pdf", "docx", "txt"];
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (!ext || !allowedExtensions.includes(ext)) {
+      return NextResponse.json(
+        { error: "Unsupported file type. Use PDF, DOCX, or TXT." },
+        { status: 400 }
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
