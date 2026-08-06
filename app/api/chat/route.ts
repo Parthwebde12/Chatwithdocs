@@ -16,10 +16,8 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseServerClient();
 
-    // 1. Embed the question
     const queryEmbedding = await embedText(question);
 
-    // 2. Find the most relevant chunks via the match_chunks SQL function
     const { data: matches, error } = await supabase.rpc("match_chunks", {
       query_embedding: queryEmbedding,
       match_document_id: documentId,
@@ -28,11 +26,18 @@ export async function POST(req: NextRequest) {
 
     if (error) throw new Error(error.message);
 
-    const context = (matches ?? [])
+    if (!matches || matches.length === 0) {
+      return NextResponse.json({
+        answer:
+          "I couldn't find any relevant content in this document to answer that.",
+        sourceChunks: [],
+      });
+    }
+
+    const context = matches
       .map((m: { content: string }) => m.content)
       .join("\n\n---\n\n");
 
-    // 3. Ask Claude, grounded in the retrieved chunks
     const response = await anthropic.messages.create({
       model: "claude-sonnet-4-5",
       max_tokens: 1000,
@@ -49,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       answer,
-      sourceChunks: (matches ?? []).map((m: { content: string }) => m.content),
+      sourceChunks: matches.map((m: { content: string }) => m.content),
     });
   } catch (err) {
     console.error(err);
