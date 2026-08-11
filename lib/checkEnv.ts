@@ -2,8 +2,7 @@ const REQUIRED_ENV_VARS = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
-  "ANTHROPIC_API_KEY",
-  "OPENAI_API_KEY",
+  "GEMINI_API_KEY",
 ] as const;
 
 export function assertEnv() {

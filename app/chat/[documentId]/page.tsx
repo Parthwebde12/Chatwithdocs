@@ -6,7 +6,7 @@ import type { ChatMessage } from "@/lib/types";
 
 export default function ChatPage() {
   const { documentId } = useParams();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<(ChatMessage & { sources?: string[] })[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,15 +30,12 @@ export default function ChatPage() {
 
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.answer },
+        { role: "assistant", content: data.answer, sources: data.sourceChunks },
       ]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, something went wrong answering that.",
-        },
+        { role: "assistant", content: "Sorry, something went wrong answering that." },
       ]);
     } finally {
       setLoading(false);
@@ -47,22 +44,44 @@ export default function ChatPage() {
 
   return (
     <main className="max-w-2xl mx-auto p-6 flex flex-col h-screen">
-      <h1 className="text-xl font-semibold mb-4">Chat</h1>
+      <p className="font-mono text-xs tracking-widest text-accent uppercase mb-1">
+        Reading
+      </p>
+      <h1 className="font-display text-2xl font-semibold mb-6">Ask a question</h1>
 
-      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`p-3 rounded-lg max-w-[80%] ${
-              m.role === "user"
-                ? "bg-blue-600 text-white ml-auto"
-                : "bg-gray-200 text-gray-900"
-            }`}
-          >
-            {m.content}
+          <div key={i}>
+            <div
+              className={`p-3 rounded-md max-w-[85%] text-sm leading-relaxed ${
+                m.role === "user"
+                  ? "bg-ink text-paper ml-auto"
+                  : "bg-paper-raised border border-line text-ink"
+              }`}
+            >
+              {m.content}
+            </div>
+
+            {m.sources && m.sources.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {m.sources.map((s, idx) => (
+                  <details
+                    key={idx}
+                    className="bg-accent-soft border border-accent/30 rounded-sm px-2 py-1 text-xs font-mono text-ink-soft max-w-[220px]"
+                  >
+                    <summary className="cursor-pointer text-accent">
+                      source {idx + 1}
+                    </summary>
+                    <p className="mt-1 line-clamp-4">{s}</p>
+                  </details>
+                ))}
+              </div>
+            )}
           </div>
         ))}
-        {loading && <p className="text-sm text-gray-500">Thinking...</p>}
+        {loading && (
+          <p className="font-mono text-xs text-ink-soft">reading document...</p>
+        )}
       </div>
 
       <div className="flex gap-2">
@@ -71,13 +90,13 @@ export default function ChatPage() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Ask something about the document..."
-          className="flex-1 border rounded-lg px-3 py-2"
+          className="flex-1 border border-line bg-paper-raised rounded-md px-3 py-2 text-sm focus:outline-none focus:border-accent"
         />
         <button
           onClick={sendMessage}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          className="bg-ink text-paper px-4 py-2 rounded-md text-sm font-medium hover:bg-ink/90"
         >
-          Send
+          Ask
         </button>
       </div>
     </main>

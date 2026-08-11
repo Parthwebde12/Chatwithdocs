@@ -1,5 +1,3 @@
-// Splits raw text into overlapping chunks so retrieval has enough context
-// without pulling in the entire document every time.
 export function chunkText(
   text: string,
   chunkSize = 800,
@@ -16,4 +14,3 @@ export function chunkText(
 
   return chunks.filter((c) => c.trim().length > 0);
 }
-l

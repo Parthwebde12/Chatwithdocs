@@ -7,8 +7,7 @@ export async function parseFile(
   const ext = filename.split(".").pop()?.toLowerCase();
 
   if (ext === "pdf") {
-   
-    const pdfParse = (await import("pdf-parse/lib/pdf-parse.js")).default;
+    const pdfParse = (await import("pdf-parse")).default;
     const result = await pdfParse(buffer);
     return result.text;
   }

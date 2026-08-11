@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
 
     const supabase = getSupabaseServerClient();
 
-    // 1. Create the document record
     const { data: doc, error: docError } = await supabase
       .from("documents")
       .insert({ filename: file.name })
@@ -49,13 +48,9 @@ export async function POST(req: NextRequest) {
       throw new Error(docError?.message ?? "Failed to create document");
     }
 
-    // 2. Chunk the text
     const chunks = chunkText(text);
-
-    // 3. Generate embeddings for all chunks in one batch call
     const embeddings = await embedBatch(chunks);
 
-    // 4. Insert chunks with their embeddings
     const rows = chunks.map((content, i) => ({
       document_id: doc.id,
       content,

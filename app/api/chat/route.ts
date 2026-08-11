@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { embedText } from "@/lib/embeddings";
-import { anthropic } from "@/lib/anthropic";
+import { geminiChat } from "@/lib/gemini";
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,19 +38,11 @@ export async function POST(req: NextRequest) {
       .map((m: { content: string }) => m.content)
       .join("\n\n---\n\n");
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 1000,
-      messages: [
-        {
-          role: "user",
-          content: `Answer the question using ONLY the context below. If the answer isn't in the context, say so.\n\nContext:\n${context}\n\nQuestion: ${question}`,
-        },
-      ],
-    });
+    const result = await geminiChat.generateContent(
+      `Answer the question using ONLY the context below. If the answer isn't in the context, say so.\n\nContext:\n${context}\n\nQuestion: ${question}`
+    );
 
-    const answer =
-      response.content[0].type === "text" ? response.content[0].text : "";
+    const answer = result.response.text();
 
     return NextResponse.json({
       answer,

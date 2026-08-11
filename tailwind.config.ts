@@ -6,7 +6,17 @@ const config: Config = {
     "./components/**/*.{ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        paper: "#EDEAE1",
+        "paper-raised": "#F5F2EA",
+        ink: "#20262E",
+        "ink-soft": "#5B6472",
+        accent: "#B8863B",
+        "accent-soft": "#F0E4C8",
+        line: "#D9D4C7",
+      },
+    },
   },
   plugins: [],
 };

@@ -20,7 +20,15 @@ export default function FileUpload() {
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("Non-JSON response:", text);
+        throw new Error("Server error — check terminal for details");
+      }
 
       if (!res.ok) throw new Error(data.error);
 
@@ -33,16 +41,22 @@ export default function FileUpload() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 p-8 border-2 border-dashed rounded-lg">
-      <p className="text-gray-600">Upload a PDF, DOCX, or TXT file</p>
+    <label className="w-full max-w-sm flex flex-col items-center gap-3 p-10 bg-paper-raised border border-line rounded-md cursor-pointer hover:border-accent transition-colors">
+      <div className="w-10 h-10 rounded-full bg-accent-soft flex items-center justify-center text-accent font-display text-lg">
+        +
+      </div>
+      <p className="font-mono text-xs text-ink-soft uppercase tracking-wide">
+        {uploading ? "Reading document..." : "PDF · DOCX · TXT"}
+      </p>
       <input
         type="file"
         accept=".pdf,.docx,.txt"
         onChange={handleUpload}
         disabled={uploading}
-        className="text-sm"
+        className="hidden"
       />
-      {uploading && <p className="text-sm text-gray-500">Processing document...</p>}
-    </div>
+    </label>
   );
 }
+
+// aastha098123@
