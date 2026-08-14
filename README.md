@@ -16,7 +16,7 @@ Built using **RAG (Retrieval-Augmented Generation)**: the document is chunked, c
 | Styling | Tailwind CSS |
 | Database | Supabase (Postgres) |
 | Vector search | pgvector |
-| LLM / Embeddings | *fill in whichever provider you ended up using* |
+| LLM / Embeddings | GeminiAPI |
 | File parsing | pdf-parse, mammoth |
 | Hosting | Vercel |
 
