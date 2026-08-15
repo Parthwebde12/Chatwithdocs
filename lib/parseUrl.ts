@@ -48,8 +48,7 @@ export async function parseUrl(
   if (Buffer.byteLength(html, "utf-8") > MAX_HTML_BYTES) {
     throw new Error("Page is too large to import");
   }
-
-  const titleMatch = html.match(/<title[^>]*>(.*?)<\/title>/is);
+const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const title = titleMatch ? titleMatch[1].trim() : parsed.hostname;
 
   const text = convert(html, {
