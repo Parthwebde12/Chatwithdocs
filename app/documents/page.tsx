@@ -5,8 +5,8 @@ import Link from "next/link";
 
 type Document = {
   id: string;
-  name: string;
-  created_at: string;
+  filename: string;
+  uploaded_at: string;
 };
 
 export default function DocumentsPage() {
@@ -50,8 +50,11 @@ export default function DocumentsPage() {
         method: "DELETE",
       });
 
+      const data = await res.json().catch(() => null);
+
       if (!res.ok) {
-        throw new Error("Failed to delete document");
+        console.error("Delete failed:", res.status, data);
+        throw new Error(data?.error ?? `Failed to delete document (${res.status})`);
       }
 
       setDocuments((current) =>
@@ -59,7 +62,7 @@ export default function DocumentsPage() {
       );
     } catch (error) {
       console.error(error);
-      alert("Failed to delete document");
+      alert(error instanceof Error ? error.message : "Failed to delete document");
     } finally {
       setDeleting(null);
     }
@@ -143,12 +146,12 @@ export default function DocumentsPage() {
 
                   <div className="min-w-0">
                     <h2 className="truncate font-medium">
-                      {document.name}
+                      {document.filename}
                     </h2>
 
                     <p className="mt-1 text-xs text-gray-500">
                       {new Date(
-                        document.created_at
+                        document.uploaded_at
                       ).toLocaleDateString()}
                     </p>
                   </div>
