@@ -43,8 +43,7 @@ export async function parseUrl(
   if (!contentType.includes("text/html") && !contentType.includes("text/plain")) {
     throw new Error(`Unsupported content type: ${contentType}`);
   }
-
-  const MAX_HTML_BYTES = 5 * 1024 * 1024; // 5MB cap on the fetched page
+  const MAX_HTML_BYTES = 5 * 1024 * 1024; 
   const html = await res.text();
   if (Buffer.byteLength(html, "utf-8") > MAX_HTML_BYTES) {
     throw new Error("Page is too large to import");
