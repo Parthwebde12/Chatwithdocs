@@ -49,7 +49,22 @@ export async function POST(req: NextRequest) {
     }
 
     const chunks = chunkText(text);
-    const embeddings = await embedBatch(chunks);
+
+    let embeddings: number[][];
+    try {
+      embeddings = await embedBatch(chunks);
+    } catch (embedErr) {
+      console.error("=== EMBEDDING ERROR ===");
+      console.error(embedErr);
+      if (embedErr instanceof Error && "cause" in embedErr) {
+        console.error("CAUSE:", embedErr.cause);
+      }
+      throw new Error(
+        embedErr instanceof Error
+          ? `Embedding failed: ${embedErr.message}`
+          : "Embedding failed"
+      );
+    }
 
     const rows = chunks.map((content, i) => ({
       document_id: doc.id,
@@ -66,7 +81,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ documentId: doc.id, chunkCount: rows.length });
   } catch (err) {
+    console.error("=== UPLOAD ERROR ===");
     console.error(err);
+    if (err instanceof Error && "cause" in err) {
+      console.error("CAUSE:", err.cause);
+    }
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Upload failed" },
       { status: 500 }
