@@ -14,10 +14,21 @@
   --line: #d9d4c7;
 }
 
+.dark {
+  --paper: #1a1e24;
+  --paper-raised: #242933;
+  --ink: #edeae1;
+  --ink-soft: #a8b0bd;
+  --accent: #d9a94f;
+  --accent-soft: #3a3226;
+  --line: #383f4a;
+}
+
 body {
   background-color: var(--paper);
   color: var(--ink);
   font-family: 'Inter', sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .font-display {
