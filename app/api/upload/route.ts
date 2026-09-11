@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseServerClient } from "@/lib/supabase";
 import { parseFile } from "@/lib/parseFile";
+import { chunkText } from "@/lib/chunkText";
+import { embedBatch } from "@/lib/embeddings";
 import { assertEnv } from "@/lib/checkEnv";
-import { ingestDocument } from "@/lib/ingesDocument";
-
-
-const ALLOWED_EXTENSIONS = ["pdf", "docx", "txt", "md", "csv", "xlsx", "xls", "pptx"];
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,21 +24,68 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const allowedExtensions = ["pdf", "docx", "txt"];
     const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
+    if (!ext || !allowedExtensions.includes(ext)) {
       return NextResponse.json(
-        { error: `Unsupported file type. Use ${ALLOWED_EXTENSIONS.join(", ")}.` },
+        { error: "Unsupported file type. Use PDF, DOCX, or TXT." },
         { status: 400 }
       );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const text = await parseFile(buffer, file.name);
-    const result = await ingestDocument(file.name, text);
 
-    return NextResponse.json(result);
+    const supabase = getSupabaseServerClient();
+
+    const { data: doc, error: docError } = await supabase
+      .from("documents")
+      .insert({ filename: file.name })
+      .select()
+      .single();
+
+    if (docError || !doc) {
+      throw new Error(docError?.message ?? "Failed to create document");
+    }
+
+    const chunks = chunkText(text);
+
+    let embeddings: number[][];
+    try {
+      embeddings = await embedBatch(chunks);
+    } catch (embedErr) {
+      console.error("=== EMBEDDING ERROR ===");
+      console.error(embedErr);
+      if (embedErr instanceof Error && "cause" in embedErr) {
+        console.error("CAUSE:", embedErr.cause);
+      }
+      throw new Error(
+        embedErr instanceof Error
+          ? `Embedding failed: ${embedErr.message}`
+          : "Embedding failed"
+      );
+    }
+
+    const rows = chunks.map((content, i) => ({
+      document_id: doc.id,
+      content,
+      chunk_index: i,
+      embedding: embeddings[i],
+    }));
+
+    const { error: chunkError } = await supabase.from("chunks").insert(rows);
+
+    if (chunkError) {
+      throw new Error(chunkError.message);
+    }
+
+    return NextResponse.json({ documentId: doc.id, chunkCount: rows.length });
   } catch (err) {
+    console.error("=== UPLOAD ERROR ===");
     console.error(err);
+    if (err instanceof Error && "cause" in err) {
+      console.error("CAUSE:", err.cause);
+    }
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Upload failed" },
       { status: 500 }

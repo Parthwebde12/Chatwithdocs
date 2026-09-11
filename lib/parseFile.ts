@@ -1,6 +1,6 @@
 import mammoth from "mammoth";
-import * as XLSX from "xlsx";
 import JSZip from "jszip";
+import * as XLSX from "xlsx";
 
 export async function parseFile(
   buffer: Buffer,
