@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { assertEnv } from "@/lib/checkEnv";
 import { parseUrl } from "@/lib/parseUrl";
-import { ingestDocument } from "@/lib/ingesDocument";
+import { ingestDocument } from "@/lib/ingestDocument";
 
 export async function POST(req: NextRequest) {
   try {
