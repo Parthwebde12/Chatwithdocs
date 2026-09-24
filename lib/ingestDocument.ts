@@ -2,7 +2,11 @@ import { getSupabaseServerClient } from "./supabase";
 import { chunkText } from "./chunkText";
 import { embedBatch } from "./embeddings";
 
-export async function ingestDocument(filename: string, text: string) {
+export async function ingestDocument(
+  filename: string,
+  text: string,
+  userId: string
+) {
   if (!text || text.trim().length === 0) {
     throw new Error("No extractable text found in this document");
   }
@@ -11,7 +15,7 @@ export async function ingestDocument(filename: string, text: string) {
 
   const { data: doc, error: docError } = await supabase
     .from("documents")
-    .insert({ filename })
+    .insert({ filename, user_id: userId })
     .select()
     .single();
 

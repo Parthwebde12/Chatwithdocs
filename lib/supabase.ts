@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 export function getSupabaseServerClient() {
   return createClient(
@@ -7,9 +7,15 @@ export function getSupabaseServerClient() {
   );
 }
 
+let browserClient: SupabaseClient | undefined;
+
 export function getSupabaseBrowserClient() {
-  return createClient(
+  if (browserClient) return browserClient;
+
+  browserClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
+
+  return browserClient;
 }

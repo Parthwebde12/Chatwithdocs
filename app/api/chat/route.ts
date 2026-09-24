@@ -2,9 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { embedText } from "@/lib/embeddings";
 import { geminiChat } from "@/lib/gemini";
+import { getServerSession } from "@/lib/auth";
+import { verifyDocumentOwnership } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
+    // Check authentication
+    const user = await getServerSession();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized: Please log in" },
+        { status: 401 }
+      );
+    }
+
     const { documentId, question } = await req.json();
 
     console.log("1. Request received:", {
@@ -19,9 +30,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const owns = await verifyDocumentOwnership(documentId, user.id);
+    if (!owns) {
+      return NextResponse.json(
+        { error: "Unauthorized: You do not own this document" },
+        { status: 403 }
+      );
+    }
+
     const supabase = getSupabaseServerClient();
 
-    // STEP 1 — Embedding
     console.log("2. Creating query embedding...");
 
     const queryEmbedding = await embedText(question);
@@ -32,7 +50,6 @@ export async function POST(req: NextRequest) {
       "dimensions"
     );
 
-    // STEP 2 — Vector search
     console.log("4. Searching Supabase...");
 
     const { data: matches, error } = await supabase.rpc("match_chunks", {
@@ -65,7 +82,6 @@ export async function POST(req: NextRequest) {
 
     console.log("6. Context length:", context.length);
 
-    // STEP 3 — Gemini chat
     console.log("7. Sending context to Gemini...");
 
     const result = await geminiChat.generateContent(

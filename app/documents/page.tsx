@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getCurrentUser, signOut } from "@/lib/auth";
 
 type Document = {
   id: string;
@@ -10,13 +12,25 @@ type Document = {
 };
 
 export default function DocumentsPage() {
+  const router = useRouter();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  useEffect(() => {
+    getCurrentUser().then(setUser);
+  }, []);
 
   const fetchDocuments = async () => {
     try {
       const res = await fetch("/api/documents");
+
+      if (res.status === 401) {
+        router.push("/auth/login");
+        return;
+      }
 
       if (!res.ok) {
         throw new Error("Failed to fetch documents");
@@ -35,6 +49,11 @@ export default function DocumentsPage() {
   useEffect(() => {
     fetchDocuments();
   }, []);
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/auth/login");
+  };
 
   const handleDelete = async (id: string) => {
     const confirmed = window.confirm(
@@ -79,12 +98,46 @@ export default function DocumentsPage() {
             Chat with Docs
           </Link>
 
-          <Link
-            href="/"
-            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800"
-          >
-            Upload Document
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800"
+            >
+              Upload Document
+            </Link>
+
+            {user && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium transition hover:border-gray-300"
+                >
+                  <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-semibold">
+                    {user.email?.[0]?.toUpperCase()}
+                  </div>
+                  <span className="hidden sm:inline">{user.email}</span>
+                </button>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg z-50">
+                    <div className="px-4 py-3 border-b border-gray-200">
+                      <p className="text-sm text-gray-500">Signed in as</p>
+                      <p className="text-sm font-medium truncate">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        handleLogout();
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 

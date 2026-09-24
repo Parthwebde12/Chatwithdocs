@@ -4,9 +4,19 @@ import { parseFile } from "@/lib/parseFile";
 import { chunkText } from "@/lib/chunkText";
 import { embedBatch } from "@/lib/embeddings";
 import { assertEnv } from "@/lib/checkEnv";
+import { getServerSession } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
+    // Check authentication
+    const user = await getServerSession();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized: Please log in" },
+        { status: 401 }
+      );
+    }
+
     assertEnv();
 
     const formData = await req.formData();
@@ -40,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     const { data: doc, error: docError } = await supabase
       .from("documents")
-      .insert({ filename: file.name })
+      .insert({ filename: file.name, user_id: user.id })
       .select()
       .single();
 

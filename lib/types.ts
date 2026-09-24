@@ -1,7 +1,9 @@
 export interface DocumentRow {
   id: string;
+  user_id: string;
   filename: string;
   uploaded_at: string;
+  created_at: string;
 }
 
 export interface ChunkRow {

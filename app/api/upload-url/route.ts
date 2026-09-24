@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { assertEnv } from "@/lib/checkEnv";
 import { parseUrl } from "@/lib/parseUrl";
 import { ingestDocument } from "@/lib/ingesDocument";
+import { getServerSession } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
+    // Check authentication
+    const user = await getServerSession();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized: Please log in" },
+        { status: 401 }
+      );
+    }
+
     assertEnv();
 
     const { url } = await req.json();
@@ -13,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { text, title } = await parseUrl(url);
-    const result = await ingestDocument(title || url, text);
+    const result = await ingestDocument(title || url, text, user.id);
 
     return NextResponse.json(result);
   } catch (err) {
