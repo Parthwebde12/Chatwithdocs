@@ -4,29 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/lib/auth";
+import { useToast } from "@/lib/toast";
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
-    // Validate passwords match
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      showToast("Passwords do not match", "error");
       return;
     }
 
-    // Validate password length
     if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+      showToast("Password must be at least 6 characters", "error");
       return;
     }
 
@@ -35,21 +32,20 @@ export default function SignUpPage() {
     try {
       const { error: signUpError } = await signUp(email, password);
       if (signUpError) {
-        setError(signUpError.message);
+        showToast(signUpError.message, "error");
         return;
       }
 
-      setSuccess(true);
+      showToast("Account created! Redirecting to login...", "success");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
 
-      // Redirect to login after 2 seconds
       setTimeout(() => {
         router.push("/auth/login");
       }, 2000);
     } catch (err) {
-      setError("An unexpected error occurred");
+      showToast("An unexpected error occurred", "error");
       console.error(err);
     } finally {
       setLoading(false);
@@ -63,18 +59,6 @@ export default function SignUpPage() {
       </h1>
       <p className="text-center text-gray-600 mb-6">Create your account</p>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
-          Account created successfully! Redirecting to login...
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -86,7 +70,7 @@ export default function SignUpPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             placeholder="you@example.com"
           />
         </div>
@@ -101,7 +85,7 @@ export default function SignUpPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             placeholder="••••••••"
           />
         </div>
@@ -116,7 +100,7 @@ export default function SignUpPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             placeholder="••••••••"
           />
         </div>

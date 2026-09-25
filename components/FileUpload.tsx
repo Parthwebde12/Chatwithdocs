@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/lib/toast";
 
 export default function FileUpload() {
   const [mode, setMode] = useState<"file" | "url">("file");
   const [url, setUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
   async function submit(makeRequest: () => Promise<Response>) {
     setUploading(true);
@@ -25,7 +27,7 @@ export default function FileUpload() {
       if (!res.ok) throw new Error(data.error);
       router.push(`/chat/${data.documentId}`);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Upload failed");
+      showToast(err instanceof Error ? err.message : "Upload failed", "error");
     } finally {
       setUploading(false);
     }

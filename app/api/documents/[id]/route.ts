@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase";
-import { getServerSession } from "@/lib/auth";
+import { getServerSession } from "@/lib/session";
 import { verifyDocumentOwnership } from "@/lib/auth";
+
 
 export async function DELETE(
   req: NextRequest,

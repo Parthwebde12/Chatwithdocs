@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getCurrentUser, signOut } from "@/lib/auth";
+import { useToast } from "@/lib/toast";
 
 type Document = {
   id: string;
@@ -50,6 +51,9 @@ export default function DocumentsPage() {
     fetchDocuments();
   }, []);
 
+   const { showToast } = useToast();
+
+
   const handleLogout = async () => {
     await signOut();
     router.push("/auth/login");
@@ -79,9 +83,9 @@ export default function DocumentsPage() {
       setDocuments((current) =>
         current.filter((doc) => doc.id !== id)
       );
-    } catch (error) {
+        } catch (error) {
       console.error(error);
-      alert(error instanceof Error ? error.message : "Failed to delete document");
+      showToast(error instanceof Error ? error.message : "Failed to delete document", "error");
     } finally {
       setDeleting(null);
     }
