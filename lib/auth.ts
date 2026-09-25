@@ -1,17 +1,4 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import {
-  getSupabaseBrowserClient,
-  getSupabaseServerClient,
-  getSupabaseRouteClient,
-} from "./supabase";
-
-export async function getServerSession() {
-  const supabase = await getSupabaseRouteClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
-}
+import { getSupabaseBrowserClient, getSupabaseServerClient } from "./supabase";
 
 export async function signUp(email: string, password: string) {
   const supabase = getSupabaseBrowserClient();

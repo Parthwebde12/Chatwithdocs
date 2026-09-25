@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase";
 import { embedText } from "@/lib/embeddings";
 import { geminiChat } from "@/lib/gemini";
-import { getServerSession } from "@/lib/auth";
-import { verifyDocumentOwnership } from "@/lib/auth";
+import { getServerSession } from "@/lib/session";import { verifyDocumentOwnership } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {

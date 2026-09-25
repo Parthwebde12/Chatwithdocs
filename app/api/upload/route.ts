@@ -4,8 +4,7 @@ import { parseFile } from "@/lib/parseFile";
 import { chunkText } from "@/lib/chunkText";
 import { embedBatch } from "@/lib/embeddings";
 import { assertEnv } from "@/lib/checkEnv";
-import { getServerSession } from "@/lib/auth";
-
+import { getServerSession } from "@/lib/session";
 export async function POST(req: NextRequest) {
   try {
     // Check authentication

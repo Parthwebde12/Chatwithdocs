@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { assertEnv } from "@/lib/checkEnv";
 import { parseUrl } from "@/lib/parseUrl";
 import { ingestDocument } from "@/lib/ingestDocument";
-import { getServerSession } from "@/lib/auth";
+import { getServerSession } from "@/lib/session";
+
 
 export async function POST(req: NextRequest) {
   try {
