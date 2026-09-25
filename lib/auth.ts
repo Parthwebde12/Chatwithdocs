@@ -1,14 +1,18 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { getSupabaseBrowserClient, getSupabaseServerClient } from "./supabase";
-
+import {
+  getSupabaseBrowserClient,
+  getSupabaseServerClient,
+  getSupabaseRouteClient,
+} from "./supabase";
 
 export async function getServerSession() {
-  const supabase = getSupabaseServerClient();
+  const supabase = await getSupabaseRouteClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
 }
+
 export async function signUp(email: string, password: string) {
   const supabase = getSupabaseBrowserClient();
   return await supabase.auth.signUp({
@@ -16,7 +20,6 @@ export async function signUp(email: string, password: string) {
     password,
   });
 }
-
 
 export async function signIn(email: string, password: string) {
   const supabase = getSupabaseBrowserClient();
@@ -26,12 +29,10 @@ export async function signIn(email: string, password: string) {
   });
 }
 
-
 export async function signOut() {
   const supabase = getSupabaseBrowserClient();
   return await supabase.auth.signOut();
 }
-
 
 export async function getCurrentUser() {
   const supabase = getSupabaseBrowserClient();
