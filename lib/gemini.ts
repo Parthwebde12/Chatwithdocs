@@ -35,14 +35,14 @@ export const geminiEmbed = {
 
 export const geminiChat = {
   async generateContent(prompt: string) {
-    const response = await ai.interactions.create({
-      model: "gemini-3.6-flash",
-      input: prompt,
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
     });
 
     return {
       response: {
-        text: () => response.output_text,
+        text: () => response.text ?? "",
       },
     };
   },

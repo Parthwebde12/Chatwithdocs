@@ -6,7 +6,6 @@ import { getServerSession } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
-    // Check authentication
     const user = await getServerSession();
     if (!user) {
       return NextResponse.json(

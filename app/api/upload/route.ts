@@ -33,12 +33,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    const allowedExtensions = ["pdf", "docx", "txt"];
+const allowedExtensions = ["pdf", "docx", "txt", "md", "csv", "xlsx", "xls", "pptx"];
     const ext = file.name.split(".").pop()?.toLowerCase();
     if (!ext || !allowedExtensions.includes(ext)) {
       return NextResponse.json(
-        { error: "Unsupported file type. Use PDF, DOCX, or TXT." },
+       { error: "Unsupported file type. Use PDF, DOCX, TXT, MD, CSV, XLSX, XLS or PPTX." },
         { status: 400 }
       );
     }

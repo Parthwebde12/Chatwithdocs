@@ -53,10 +53,11 @@ export async function POST(req: NextRequest) {
     console.log("4. Searching Supabase...");
 
     const { data: matches, error } = await supabase.rpc("match_chunks", {
-      query_embedding: queryEmbedding,
-      match_document_id: documentId,
-      match_count: 5,
-    });
+  query_embedding: queryEmbedding,
+  match_document_id: documentId,
+  match_user_id: user.id,
+  match_count: 5,
+});
 
     if (error) {
       console.error("SUPABASE RPC ERROR:", error);
